@@ -14,4 +14,6 @@ public interface UserMapper {
     List<UserInfo> load(String username,String password);
     @Select("select * from Medical_user_info where user_id = #{userId}")
     UserInfo getUserInfo(String userId);
+    @Select("select * from Medical_user_info where user_code = #{userCode}")
+    List<UserInfo> getUserInfoByUserCode(String userCode);
 }
