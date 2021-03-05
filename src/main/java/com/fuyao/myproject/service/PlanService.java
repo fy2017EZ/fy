@@ -13,7 +13,7 @@ public interface PlanService {
     JSONObject deletePlan(String planId,String userCode) throws Exception;
     JSONObject deletePlan(String planId);
     JSONObject selectPlan(String planId,String beginTime,String endTime,String userCode,String userCity,String page,String limit);
-    JSONObject findPlanInfoByOne(Map<String,Object> map,String start,String end);
-    JSONObject findPlanInfoByMap(Map<String,Object> map,String start,String end);
+    JSONObject findPlanInfoByOne(Map<String,Object> map,String userCode,String start,String end);
+    JSONObject findPlanInfoByMap(Map<String,Object> map,String userCode,String start,String end);
     JSONObject getUserPlanNode(String planId,String userCode,String beginTime,String endTime,String userCity);
 }

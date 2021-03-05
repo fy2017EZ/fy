@@ -90,19 +90,8 @@ public class PlanController {
                                  @RequestParam(value = "endTime",required = false)String endTime,@RequestParam(value = "userCode",required = false)String userCode,
                                  @RequestParam(value = "userCity",required = false)String userCity,@RequestParam(value = "page",required = true)String page,
                                  @RequestParam(value = "limit",required = true)String limit){
-        return null;
-    }
-    @ApiOperation("防控计划处理之当前环节提交")
-    @GetMapping ("/submitPlan")
-    public JSONObject submitPlan(){
-        return null;
+        JSONObject data = planService.selectPlan(planId, beginTime, endTime, userCode, userCity, page, limit);
+        return data;
     }
 
-    @ApiOperation("防控计划处理之当前待处理环节查询")
-    @GetMapping ("/getUserPlanNode")
-    public JSONObject getUserPlanNode(@RequestParam(value = "userCode",required = true)String userCode,@RequestParam(value = "planId",required = true)String planId,
-                                      @RequestParam(value = "beginTime",required = false)String beginTime, @RequestParam(value = "endTime",required = false)String endTime,
-                                      @RequestParam(value = "userCity",required = false)String userCity ){
-        return null;
-    }
 }

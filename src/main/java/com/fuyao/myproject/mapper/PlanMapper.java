@@ -45,4 +45,23 @@ public interface PlanMapper {
 
     @Select("select * from(select a.*,rownum rn from Medical_control_plan_detail_info a where a.project_user_code = #{userCode}) where rn between #{start} and #{end}")
     List<PlanInfo> findPlanByAll(String start,String end,String planId,String createTime,String endTime,String userCity);
+
+    @Select("select * from(select a.*,rownum rn from Medical_control_plan_detail_info a ${whereCol} ${ColValue} and a.project_user_code = #{userCode}) where rn between #{start} and #{end}")
+    List<PlanInfo> findPlanByOne(String start,String end,String whereCol,String ColValue,String userCode);
+
+    @Select("select count(*) from(select a.*,rownum rn from Medical_control_plan_detail_info a ${whereCol} ${ColValue} and a.project_user_code = #{userCode}) ")
+    Integer findPlanByOneCount(String whereCol,String ColValue,String userCode);
+
+    @Select("select * from(select a.*,rownum rn from Medical_control_plan_detail_info a ${whereCol} ${ColValue} ${andCol1} ${ColValue1} ${andCol2} ${ColValue2}" +
+            " ${andCol3} ${ColValue3} and a.project_user_code = #{userCode})where rn between #{start} and #{end}")
+    List<PlanInfo> findPlanByMap(String whereCol,String ColValue,String andCol1,String ColValue1,String andCol2,String ColValue2,String andCol3,String ColValue3,String userCode,
+                                 String start,String end);
+
+    @Select("select count(*) from(select a.*,rownum rn from Medical_control_plan_detail_info a ${whereCol} ${ColValue} ${andCol1} ${ColValue1} ${andCol2} ${ColValue2}" +
+            " ${andCol3} ${ColValue3} and a.project_user_code = #{userCode})")
+    Integer findPlanByMapCount(String whereCol,String ColValue,String andCol1,String ColValue1,String andCol2,String ColValue2,String andCol3,String ColValue3,String userCode);
+
+  @Insert("insert into Medical_personnel_assignment_info values(#{userCode,#{userName},#{userCity},#{userPassword},#{userProcess},#{userProjectId}})")
+    void saveUserAssignMent(String userCode,String userName,String userCity,String userPassword,String userProcess,String userProjectId);
+
 }

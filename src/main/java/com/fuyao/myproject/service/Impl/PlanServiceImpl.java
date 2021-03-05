@@ -61,6 +61,10 @@ public class PlanServiceImpl implements PlanService {
                 throw new ParamException("人员配置信息不全，请输入正确的配置信息");
             }
             mapper.saveNodeInfo(String.valueOf(planId),String.valueOf(planId)+"-"+String.valueOf(i+1),paramKey,paramValue,nodes.get(i).getNode_name(),nodes.get(i).getUser_code());
+            //保存人员分配信息
+            List<UserInfo> userInfos = userMapper.getUserInfoByUserCode(nodes.get(i).getUser_code());
+            mapper.saveUserAssignMent(nodes.get(i).getUser_code(),userInfos.get(0).getUser_name(),userInfos.get(0).getUser_city(),userInfos.get(0).getUser_password(),
+                    String.valueOf(planId)+"-"+String.valueOf(i+1),planId+"");
         }
         data.put("code","200");
         return data;
@@ -125,11 +129,8 @@ public class PlanServiceImpl implements PlanService {
         if(!StringUtils.isEmpty(planId)){
             map.put("plan_id",planId);
         }
-        if(!StringUtils.isEmpty(beginTime)){
-            map.put("create_time",beginTime);
-        }
-        if(!StringUtils.isEmpty(endTime)){
-            map.put("endTime",endTime);
+        if(!StringUtils.isEmpty(beginTime)&&!StringUtils.isEmpty(endTime)){
+            map.put("create_time",beginTime+","+endTime);
         }
         if(!StringUtils.isEmpty(userCity)){
             map.put("user_city",userCity);
@@ -143,39 +144,114 @@ public class PlanServiceImpl implements PlanService {
                 if(userMapper.getUserInfoByUserCode(userCode).get(0).getRole_id().equals(1)){
                     planInfos = mapper.findAllPlan(start + "", end + "");
                     count = mapper.findAllPlanCount();
+                    data.put("count",count);
+                    data.put("result",planInfos);
                 }else{
                     planInfos = mapper.findPlanByUserCode(userCode,start+"",end+"");
                     count = mapper.findPlanByUserCodeCount(userCode);
+                    data.put("count",count);
+                    data.put("result",planInfos);
                 };break;
             case 4:
                 if(userMapper.getUserInfoByUserCode(userCode).get(0).getRole_id().equals(1)){
                     planInfos = mapper.findAllPlan(start + "", end + "");
                     count = mapper.findAllPlanCount();
+                    data.put("count",count);
+                    data.put("result",planInfos);
                 }else{
                     planInfos = mapper.findPlanByUserCode(userCode,start+"",end+"");
                     count = mapper.findPlanByUserCodeCount(userCode);
+                    data.put("count",count);
+                    data.put("result",planInfos);
                 };break;
             case 1:
-                findPlanInfoByOne(map,start+"",end+"");break;
+                data = findPlanInfoByOne(map,userCode,start+"",end+"");break;
             default:
-                findPlanInfoByMap(map,start+"",end+"");break;
+                data = findPlanInfoByMap(map,userCode,start+"",end+"");break;
         }
-        return null;
+        return data;
     }
 
     @Override
-    public JSONObject findPlanInfoByOne(Map<String, Object> map,String start,String end) {
-
-        return null;
+    public JSONObject findPlanInfoByOne(Map<String, Object> map,String userCode,String start,String end) {
+        JSONObject data = new JSONObject();
+        String whereCol = "";
+        String ColValue = "";
+        for (Object obj:map.entrySet()) {
+            Map.Entry entry = (Map.Entry)obj;
+            if(entry.getKey().equals("plan_id")){
+                whereCol = "where "+entry.getKey();
+                ColValue = " = "+ entry.getValue();
+            }else if(entry.getKey().equals("user_city")){
+                whereCol = "where "+entry.getKey();
+                ColValue = " = "+ entry.getValue();
+            }
+        }
+        Integer count = mapper.findPlanByOneCount(whereCol, ColValue, userCode);
+        List<PlanInfo> planInfos = mapper.findPlanByOne(start, end, whereCol, ColValue, userCode);
+        data.put("count",count);
+        data.put("result",planInfos);
+        return data;
     }
 
     @Override
-    public JSONObject findPlanInfoByMap(Map<String, Object> map,String start,String end) {
-        return null;
+    public JSONObject findPlanInfoByMap(Map<String, Object> map,String userCode,String start,String end) {
+        JSONObject data = new JSONObject();
+        String whereCol0 = "";
+        String ColValue0 = "";
+        String andCol1 = "";
+        String ColValue1 = "";
+        String andCol2 = "";
+        String ColValue2 = "";
+        String andCol3 = "";
+        String ColValue3 = "";
+        int i = 0;
+        for (Object obj : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) obj;
+            if (i == 0 && entry.getKey().equals("plan_id")) {
+                whereCol0 = "where " + entry.getKey();
+                ColValue0 = " = " + entry.getValue();
+                i++;
+                continue;
+            } else if (entry.getKey().equals("plan_id")) {
+                andCol1 = "and " + entry.getKey();
+                ColValue1 = " = " + entry.getValue();
+            }
+            if (i == 0 && entry.getKey().equals("create_time")) {
+                String dataTime = (String) entry.getValue();
+                String[] times = dataTime.split(",");
+                whereCol0 = "where " + entry.getKey();
+                ColValue0 = " between to_date('" + times[0] + "','yyyy/MM/dd') and to_date('" + times[1] + "','yyyy/MM/dd')";
+                i++;
+                continue;
+            } else if (entry.getKey().equals("create_time") && !org.springframework.util.StringUtils.isEmpty(map.get("endTime"))) {
+                String dataTime = (String) entry.getValue();
+                String[] times = dataTime.split(",");
+                andCol2 = "and " + entry.getKey();
+                ColValue2 = " between to_date('" + times[0] + "','yyyy/MM/dd') and to_date('" + times[1] + "','yyyy/MM/dd')";
+                continue;
+            }
+            if (i == 0 && entry.getKey().equals("user_city")) {
+                whereCol0 = "where " + entry.getKey();
+                ColValue0 = "  = " + entry.getValue();
+                i++;
+                continue;
+            } else if (entry.getKey().equals("user_city")) {
+                andCol3 = "and " + entry.getKey();
+                ColValue3 = "  = " + entry.getValue();
+                continue;
+            }
+        }
+        List<PlanInfo> planInfos = mapper.findPlanByMap(whereCol0, ColValue0, andCol1, ColValue1, andCol2, ColValue2, andCol3, ColValue3, userCode, start, end);
+        Integer count = mapper.findPlanByMapCount(whereCol0, ColValue0, andCol1, ColValue1, andCol2, ColValue2, andCol3, ColValue3, userCode);
+        data.put("count",count);
+        data.put("result",planInfos);
+        return  data;
     }
 
     @Override
     public JSONObject getUserPlanNode(String planId, String userCode, String beginTime, String endTime, String userCity) {
+
         return null;
     }
 }
